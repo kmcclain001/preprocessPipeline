@@ -164,6 +164,7 @@ for ibatch = 1:nbChunks
         end
         
         tmp=  iosr.dsp.sincFilter(d,ratio);
+        tmp = d;
         if useGPU
             if ibatch==1
                 DATA(ii,:) = gather_try(int16(real( tmp(sampleRatio:sampleRatio:end-ntbuff))));
@@ -200,7 +201,8 @@ if ~isempty(remainder)
             d = gpuArray(d);
         end
         
-        tmp=  iosr.dsp.sincFilter(d,ratio);
+        %tmp=  iosr.dsp.sincFilter(d,ratio);KM
+        tmp = d;
         
         if useGPU
             

@@ -106,7 +106,7 @@ end
 
 %% Make LFP
 
-bz_LFPfromDat_km(pwd,'outFs',1250); % generating lfp
+bz_LFPfromDat_km(pwd,'outFs',1250,'lopass',625); % generating lfp
 
 %% remove noise from data for cleaner spike sorting
 

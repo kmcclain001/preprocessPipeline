@@ -31,3 +31,7 @@ compute_place_fields_session('basepath',pwd);
 
 create_thetaInfo_object('basepath',pwd);
 
+%% Detect ripples
+
+
+
