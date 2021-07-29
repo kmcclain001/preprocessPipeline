@@ -145,6 +145,9 @@ for ibatch = 1:nbChunks
     end
     
     if ibatch>1
+        if ibatch==nbChunks
+            apple = 1;
+        end
         fseek(fidI,((ibatch-1)*(nbChan*sizeInBytes*chunksize))-(nbChan*sizeInBytes*ntbuff),'bof');
         dat = fread(fidI,nbChan*(chunksize+2*ntbuff),'int16');
         dat = reshape(dat,[nbChan (chunksize+2*ntbuff)]);

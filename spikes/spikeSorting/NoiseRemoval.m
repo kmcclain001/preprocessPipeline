@@ -28,7 +28,7 @@ clear lfp;
 
 noiseIntsSlo = findIntervals(above_thresh);
 
-noiseIntsFast = noiseIntsSlo*8; %adjust for 8x sampling rate in dat file [FIXTHIS]
+noiseIntsFast = noiseIntsSlo*8; %adjust for 8x sampling rate in dat file [FIX THIS]
 
 %%
 % Replace in dat file
