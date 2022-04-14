@@ -40,7 +40,7 @@ for i = 1:nCells
     wave_scaled = wave-min(wave);
     wave_scaled = wave_scaled./max(wave_scaled);
     [~,ind] = min(wave_scaled);
-    last_half = sum(wave_scaled(ind:end))/rep_zero(32-ind);
+    last_half = sum(wave_scaled(ind:end))/rep_zero(length(wave_scaled)-ind);
     cluster_params(4) = last_half;
     
     % Find fr info
@@ -58,7 +58,7 @@ for i = 1:nCells
     cluster_params(3) = log(ACGparams(3));
     
     % Add params to cell info
-    CellClass.params{i}.ACG = ACG;
+    CellClass.params{i}.ACG = ACG';
     CellClass.params{i}.waveform = wave;
     CellClass.params{i}.Rate = Rate;
     CellClass.params{i}.doubexpo = ACGparams;
@@ -99,7 +99,7 @@ end
 CellClass.UID = spikes.UID;
 CellClass.Pyr = CellClass.PyrInt ==1;
 CellClass.Int = CellClass.PyrInt ==-1;
-CellClass.maxWaveCh = spikes.maxWaveformCh1;
+CellClass.maxWaveCh = spikes.maxWaveformCh;
 CellClass.shankID = spikes.shankID;
 
 end

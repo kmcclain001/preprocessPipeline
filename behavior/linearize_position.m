@@ -2,9 +2,11 @@ function linearize_position(varargin)
 
 p = inputParser;
 addParameter(p,'basepath',pwd,@isfolder);
+addParameter(p,'plotSummary',true,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
+plotSummary = p.Results.plotSummary;
 
 behavefile = checkFile('basepath',basepath,'fileType','.behavior.mat');
 
@@ -47,4 +49,17 @@ behavior.linearFunction = f;
 
 save([behavefile.folder filesep behavefile.name],'behavior');
 
+if plotSummary
+    subplot(1,4,4);
+    trialN = round(n_trials/4);
+    x = behavior.events.trials{trialN}.x;
+    y = behavior.events.trials{trialN}.y;
+    l = f([x,y]);
+    plot(x,l);
+    title('x vs linear, example trial')
+    
+    savefig(gcf,[basepath '\sanityCheckFigures\linearize.fig'])
+    saveas(gcf,[basepath '\sanityCheckFigures\linearize.jpg'])
+end
+    
 end

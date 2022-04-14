@@ -33,6 +33,7 @@ function [node_inds,field_labels] = find_place_fields(G,FR,varargin)
     p.addParameter('area_lim', 5/8,@isfloat);
     p.addParameter('smoothed',[],@isfloat);
     p.addParameter('min_trial_prop',1/5,@isfloat);
+    p.addParameter('min_trial_thresh_frac',.5,@isflot);
     
     parse(p,varargin{:});
     max_frac = p.Results.max_frac;
@@ -42,6 +43,7 @@ function [node_inds,field_labels] = find_place_fields(G,FR,varargin)
     area_lim = p.Results.area_lim;
     smoothed = p.Results.smoothed;
     min_trial_prop = p.Results.min_trial_prop;
+    min_trial_thresh_frac = p.Results.min_trial_thresh_frac;
     
     %Find spots with FR above threshold
     FR_raw = FR;
@@ -89,7 +91,8 @@ function [node_inds,field_labels] = find_place_fields(G,FR,varargin)
         %Make sure field is present for certain proportion of trials
         n_trials = size(FR_raw,1);
         rate_in_bins = sum(FR_raw(:,possible_node_inds(groups==i)),2);
-        if sum(rate_in_bins>0)< min_trial_prop*n_trials
+        min_trial_thresh = mean(rate_in_bins)*min_trial_thresh_frac;
+        if sum(rate_in_bins>min_trial_thresh)< min_trial_prop*n_trials
             good(i) = 0;
         end
         

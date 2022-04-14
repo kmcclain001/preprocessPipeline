@@ -11,12 +11,12 @@ kcoords = zeros(1,chInfo.nChannel);
 
 xCenter = 150;
 for shIdx = 1:4
-    channels = chInfo.oneAnatGrps{shIdx};
+    channels = chInfo.one.AnatGrps{shIdx};
     kcoords(channels) = shIdx;
     
     %high channel
     xcoords(channels(1)) = xCenter;
-    ycoords(channels(1)) = -1200+(200*(shIdx-1));
+    ycoords(channels(1)) = 1200-(200*(shIdx-1));
     
     %lowest channel
     xcoords(channels(end)) = xCenter;
@@ -43,10 +43,10 @@ for shIdx = 1:4
     xCenter = xCenter+150;
 end
 
-xCenter = 150;
+xCenter = 150+1000;
 for shIdx = 5:8
     
-    channels = chInfo.oneAnatGrps{shIdx};
+    channels = chInfo.one.AnatGrps{shIdx};
     kcoords(channels) = shIdx;
     xcoords(channels) = xCenter;
     

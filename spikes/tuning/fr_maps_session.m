@@ -6,9 +6,11 @@ function Tuning = fr_maps_session(varargin)
 
 p = inputParser;
 addParameter(p,'basepath',pwd,@isstr);
+addParameter(p,'plotSummary',true,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
+plotSummary = p.Results.plotSummary;
 
 % load shit
 fBehav = checkFile('basepath',basepath,'fileType','.behavior.mat');
@@ -58,4 +60,31 @@ Tuning.seMaps = se_maps;
 % save shit
 save([fBehav.folder filesep fBehav.name],'behavior')
 save([fTuning.folder filesep fTuning.name],'Tuning')
+
+if plotSummary
+    figure;
+    nRows = ceil(Tuning.nCells/3);
+    for cellIdx = 1:Tuning.nCells
+        subplot(nRows,3,cellIdx);hold on
+        for trialType = 1:length(usable_types)
+            plot(Tuning.rateMaps{usable_types(trialType)}(cellIdx,:));
+        end
+    end
+    
+    savefig(gcf,[basepath '\sanityCheckFigures\rateMaps.fig'])
+    saveas(gcf,[basepath '\sanityCheckFigures\rateMaps.jpg'])
+    
+    for trialType = 1:length(usable_types)
+        t = usable_types(trialType);
+        trialInds=find(Tuning.trialType==t);
+        figure;
+        for cellIdx = 1:Tuning.nCells
+            subplot(nRows,3,cellIdx);hold on
+            imagesc(Tuning.fr(trialInds,:,cellIdx))
+        end
+        
+        savefig(gcf,[basepath '\sanityCheckFigures\rateTrial_' num2str(t) '.fig'])
+        saveas(gcf,[basepath '\sanityCheckFigures\rateTrial_' num2str(t) '.jpg'])
+    end
+    
 end

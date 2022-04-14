@@ -75,6 +75,7 @@ switch method
         fid = fopen([basepath, filesep, syncDatFile]);
         dig = fread(fid,[syncNbCh inf],'int16=>int16');  % default type for Intan digitalin
         dig = dig(syncChan,:);
+        dig = mod(dig,16); % because sometimes theres alternating 0,16 values?
         t = (0:length(dig)-1)'/syncSampFq; % time vector in sec
         
         dPos = find(diff(dig)==1);
@@ -107,7 +108,13 @@ end
 % Group TTL pulses to find gaps
 TTLgroups = groupPulses(TTLtimes,1.5);
 if max(TTLgroups)~=length(pos)
-    error('number of optitrack tiles not matching groups of pulses')
+    warning('number of optitrack files not matching groups of pulses')
+    if length(pos)==1
+        disp('if one file, assume last group of pulses corresponds to file')
+        
+        TTLtimes = TTLtimes(TTLgroups==max(TTLgroups));
+        TTLgroups = ones(sum(TTLgroups==max(TTLgroups)),1);
+    end
 end
 
 % The system sometimes (rarely) keeps on recording a few frames after software stopped

@@ -101,11 +101,16 @@ function [f, G, fig] = linearize_track(filename,plot_info)
     % plot info
     if plot_info
         fig = figure();hold on
-        subplot(1,3,1);
+        n = 4;
+        subplot(1,n,1);
         imagesc(occ);
+        set(gca,'YDir','normal')
+        title('occupancy')
         
-        subplot(1,3,2);
+        subplot(1,n,2);
         imagesc(skel_img);
+        set(gca,'YDir','normal')
+        title('adjacency matrix')
 %         inds = 1:length(v);
 %         colored_img = zeros(size(skel_img));
 %         for i = 1:length(v)
@@ -114,9 +119,12 @@ function [f, G, fig] = linearize_track(filename,plot_info)
 %         imagesc(colored_img);
         %image(skel_img,'CDataMapping','scaled')
         
-        subplot(1,3,3);
+        subplot(1,n,3);
         l = f([x_all,y_all]);
         scatter(x_all,y_all,[],l,'.');
+        title('2D -> linear mapping')
+        
+        
     else
         fig = [];
     end

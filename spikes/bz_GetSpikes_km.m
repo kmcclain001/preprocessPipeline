@@ -126,12 +126,12 @@ if strcmpi(sortingMethod, 'kilosort') || ~isempty(kilosort_path) % LOADING FROM 
     spike_cluster_index = readNPY(fullfile(kilosort_path.name, 'spike_clusters.npy'));
     spike_times = readNPY(fullfile(kilosort_path.name, 'spike_times.npy'));
     cluster_group = tdfread(fullfile(kilosort_path.name,'cluster_group.tsv'));
-    try
-        shanks = readNPY(fullfile(kilosort_path.name, 'shanks.npy')); % done
-    catch
-        shanks = ones(size(cluster_group.cluster_id));
-        warning('No shanks.npy file, assuming single shank!');
-    end
+%     try
+%         shanks = readNPY(fullfile(kilosort_path.name, 'shanks.npy')); % done
+%     catch
+%         shanks = ones(size(cluster_group.cluster_id));
+%         warning('No shanks.npy file, assuming single shank!');
+%     end
     
     spikes.sessionName = session.general.name;
     jj = 1;
@@ -142,8 +142,9 @@ if strcmpi(sortingMethod, 'kilosort') || ~isempty(kilosort_path) % LOADING FROM 
             spikes.UID(jj) = jj;
             spikes.times{jj} = double(spike_times(ids))/fs; % cluster time
             spikes.ts{jj} = double(spike_times(ids)); % cluster time
-            cluster_id = find(cluster_group.cluster_id == spikes.cluID(jj));
-            spikes.shankID(jj) = double(shanks(cluster_id));
+%             cluster_id = find(cluster_group.cluster_id == spikes.cluID(jj));
+%             spikes.shankID(jj) = double(shanks(cluster_id));
+            
             jj = jj + 1;
         end
     end
@@ -163,6 +164,7 @@ if any(getWaveforms) && ~keepCluWave
     spikes.rawWaveform = cell(nCell,1);
     spikes.filtWaveform = cell(nCell,1);
     spikes.maxWaveformCh = zeros(nCell,1);
+    spikes.shankID = zeros(nCell,1);
     for ii = 1 : nCell
         spkTmp = spikes.ts{ii};
         if length(spkTmp) > nPull
@@ -190,7 +192,9 @@ if any(getWaveforms) && ~keepCluWave
         filtWaveform = wfF(:,maxCh) - mean(wfF(:,maxCh));
         spikes.rawWaveform{ii} = rawWaveform(wfWin-(0.002*fs):wfWin+(0.002*fs)); % keep only +- 1ms of waveform
         spikes.filtWaveform{ii} = filtWaveform(wfWin-(0.002*fs):wfWin+(0.002*fs));
-        spikes.maxWaveformCh(ii) = chInfo.one.channels(maxCh);
+        maxWaveCh = chInfo.one.channels(maxCh);
+        spikes.maxWaveformCh(ii) = maxWaveCh;
+        spikes.shankID(ii) = chInfo.shankID(maxWaveCh);
         
     end
 
@@ -253,9 +257,11 @@ if ~isempty(UID)
     [toRemove] = ~ismember(spikes.UID,UID);
     spikes = removeCells(toRemove,spikes,getWaveforms);
 end
+spikes.numcells = length(spikes.UID);
+
 
 % %% Generate spindices matrics
-% spikes.numcells = length(spikes.UID);
+% 
 % for cc = 1:spikes.numcells
 %     groups{cc}=spikes.UID(cc).*ones(size(spikes.times{cc}));
 % end

@@ -37,6 +37,7 @@ if newForm && ~useOld
     out.spikeSR = session.extracellular.sr;
     out.one.AnatGrps = session.extracellular.electrodeGroups.channels;
     out.zero.AnatGrps = cellfun(@(x)x-1,out.one.AnatGrps,'UniformOutput',false);
+    out.recordingName = session.general.name;
 else
     sessionInfo = bz_getSessionInfo(basepath);
     out.OGformat = 'old';

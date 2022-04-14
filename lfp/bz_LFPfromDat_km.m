@@ -85,7 +85,7 @@ if useGPU && gpuDeviceCount<1
     useGPU = false;
 end
 
-sizeInBytes = 2; %
+sizeInBytes = 2; % number of bits per value(?)
 
 %% housekeeping
 
@@ -128,7 +128,7 @@ if mod(ntbuff,sampleRatio)~=0
 end
 
 nBytes = fInfo.bytes;
-nbChunks = floor(nBytes/(nbChan*sizeInBytes*chunksize));
+nbChunks = floor((nBytes-(nbChan*sizeInBytes*ntbuff))/(nbChan*sizeInBytes*chunksize));
 
 %% GET LFP FROM DAT
 fidI = fopen(fdat, 'r');
@@ -167,7 +167,7 @@ for ibatch = 1:nbChunks
         end
         
         tmp=  iosr.dsp.sincFilter(d,ratio);
-        tmp = d;
+        %tmp = d;
         if useGPU
             if ibatch==1
                 DATA(ii,:) = gather_try(int16(real( tmp(sampleRatio:sampleRatio:end-ntbuff))));

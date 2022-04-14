@@ -35,7 +35,7 @@ function  preprocess1(varargin)
 
 p = inputParser;
 addParameter(p,'basepath',pwd,@isfolder); % by default, current folder
-addParameter(p,'fillMissingDatFiles',false,@islogical);
+addParameter(p,'fillMissingDatFiles',true,@islogical);
 addParameter(p,'fillTypes',[],@iscellstr);
 addParameter(p,'getAcceleration',false,@islogical);
 addParameter(p,'stateScore',false,@islogical);
@@ -59,6 +59,7 @@ if ~exist('basepath')
     error('path provided does not exist')
 end
 cd(basepath);
+
 %% Pull meta data
 
 % Get session names
@@ -77,8 +78,10 @@ end
 %% Make SessionInfo
 % ID bad channels at this point. automating would be good
 
-session = sessionTemplate(pwd,'showGUI',true); %
+session = sessionTemplate(basepath,'showGUI',true); %
 save([basename '.session.mat'],'session');
+
+mkdir([basepath '\sanityCheckFigures'])
 
 %% Fill missing dat files of zeros
 if fillMissingDatFiles
@@ -95,7 +98,7 @@ end
 cd(basepath);
 
 disp('Concatenate session folders...');
-bz_ConcatenateDats_km();
+bz_ConcatenateDats_km('basepath',basepath);
 
 %% Process additional inputs
 
@@ -106,27 +109,34 @@ end
 
 %% Make LFP
 
-bz_LFPfromDat_km(pwd,'outFs',1250,'lopass',625); % generating lfp
+bz_LFPfromDat_km(basepath,'outFs',1250,'lopass',625); % generating lfp
 
 %% remove noise from data for cleaner spike sorting
 
+% if removeNoise
+%     NoiseRemoval('basepath',basepath);
+% end
+
 if removeNoise
-    NoiseRemoval(pwd);
+    datFileMeanSubtraction('basepath',basepath,'method','subtractMedian');
+    fclose('all')
 end
 
 %% Kilosort concatenated sessions
 % if want autoclustering pass in as boolean here
 % I think should put making channel map file here
 
-createChannelMap_km(basepath);
+createChannelMap_DVB(basepath);
 
-if spikeSort
-    KiloSortWrapper('SSD_path','G:');
-end
+savepath = KiloSortWrapper('basepath',basepath);
+
+PhyAutoClustering_km(savepath);
 
 %% Get brain states 
 %not working for me, i think there are some issues selecting best channels
-SleepScoreMaster_km(pwd,'noPrompts',true);
+if stateScore
+    SleepScoreMaster_km(pwd,'noPrompts',true);
+end
 
 %% Get tracking positions 
 if getPos

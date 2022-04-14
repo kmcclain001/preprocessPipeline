@@ -7,7 +7,7 @@ addParameter(p,'endZonePercentile',5,@isfloat);
 addParameter(p,'midZonePercentile',30,@isfloat);
 addParameter(p,'outlierPercentile',1,@isfloat);
 addParameter(p,'speedThresh',0.10,@isfloat);
-
+addParameter(p,'plotSummary',true,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -16,7 +16,7 @@ endZonePercentile = p.Results.endZonePercentile;
 midZonePercentile = p.Results.midZonePercentile;
 outlierPercentile = p.Results.outlierPercentile;
 speedThresh = p.Results.speedThresh;
-
+plotSummary = p.Results.plotSummary;
 
 f = checkFile('basepath',basepath,'fileType','.behavior.mat');
 load([f.folder filesep f.name]);
@@ -92,6 +92,7 @@ trialDur = diff(trialInts,[],2);
 longTrials = find(abs(trialDur-median(trialDur))>5*mad(trialDur));
 trialInts(longTrials,:) = [];
 trialIDInds(longTrials) = [];
+trialDur(longTrials) = [];
 
 trialTypes = ones(size(trialInts,1),1);
 trialTypes(trialIDs(trialIDInds)<0) = 2;
@@ -110,6 +111,35 @@ end
 
 save([f.folder filesep f.name],'behavior');
 
+if plotSummary
+    
+    figure;
+    n = 4;
+    subplot(n,1,1); hold on
+    plot(behavior.timestamps,behavior.position.x)
+    scatter(behavior.timestamps(trialInts(:,1)),behavior.position.x(trialInts(:,1)),'g*');
+    scatter(behavior.timestamps(trialInts(:,2)),behavior.position.x(trialInts(:,2)),'r*');
+    title('Trial times')
+    
+    subplot(n,1,2);
+    histogram(trialDur/behavior.samplingRate)
+    title('Trial duration')
+    
+    subplot(n,1,3);
+    trialSpd = getCellStructValue(behavior.events.trials,'speed');
+    trialSpd = trialSpd(:);
+    histogram(trialSpd);
+    title('In-trial speed distribution')
+   
+    subplot(n,1,4);
+    histogram(trialTypes);
+    title('trial types');
+    
+    savefig(gcf,[basepath '\sanityCheckFigures\trialSegment.fig'])
+    saveas(gcf,[basepath '\sanityCheckFigures\trialSegment.jpg'])
+    
+end
+    
 end
 % could filter trials if speed drops below a certain value or trial takes
 % too long

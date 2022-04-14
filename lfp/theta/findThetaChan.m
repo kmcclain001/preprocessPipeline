@@ -8,14 +8,18 @@ function thetaCh = findThetaChan(varargin)
 
 p = inputParser;
 addParameter(p,'basepath',pwd,@isstr);
+addParameter(p,'intervals',[],@isfloat);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
+intervals = p.Results.intervals;
 
 %get behavior, ephys details
-fBehav = checkFile('basepath',basepath,'fileType','.behavior.mat');
-load([fBehav.folder filesep fBehav.name]);
-intervals = behavior.events.trialIntervals;
+if isempty(intervals)
+    fBehav = checkFile('basepath',basepath,'fileType','.behavior.mat');
+    load([fBehav.folder filesep fBehav.name]);
+    intervals = behavior.events.trialIntervals;
+end
 
 chInfo = hackInfo('basepath',basepath);
 sr = chInfo.lfpSR;

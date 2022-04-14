@@ -77,7 +77,7 @@ digitFq = session.extracellular.sr;
 
 % Load merge point info to correct times
 mergeFile = checkFile('basepath',basepath,'fileType','.MergePoints.events.mat');
-load([mergeFile.folder,filesep,mergeFile.name]);
+load([mergeFile.folder,filesep,mergeFile.name],'MergePoints');
 
 % Get csv file locations
 trackingFiles = checkFile('basepath',basepath,'fileType','.csv','searchSubDirs',true);

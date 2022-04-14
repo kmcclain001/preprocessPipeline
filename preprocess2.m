@@ -33,5 +33,5 @@ create_thetaInfo_object('basepath',pwd);
 
 %% Detect ripples
 
-
+%detectRipples('shanksToDetect',6,'detectionMethod','template','thresholdPrctile',65);
 
