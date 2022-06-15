@@ -65,8 +65,8 @@ if isempty(config)
     ops = KilosortConfiguration('basepath',basepath);
 else
     disp('Running Kilosort with user specific settings')
-    config_string = str2func(['KiloSortConfiguration_' config_version]);
-    ops = config_string(XMLFilePath);
+    config_string = str2func(['KilosortConfiguration_' config]);
+    ops = config_string('basepath',basepath);
     clear config_string;
 end
 

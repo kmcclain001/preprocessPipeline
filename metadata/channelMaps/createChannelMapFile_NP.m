@@ -1,4 +1,4 @@
-function createChannelMapFile_NP(basepath)
+function probeNumber = createChannelMapFile_NP(basepath)
 
 chInfo = hackInfo('basepath',basepath);
 
@@ -16,6 +16,7 @@ chanMap = chInfo.one.channels;
 connected = ones(chInfo.nChannel,1);
 connected(chInfo.one.badChannels) = 0;
 kcoords = ones(chInfo.nChannel,1);
+probeNumber = ones(chInfo.nChannel,1);
 
 xKern = [20 60 0 40];
 xcoords = repmat(xKern,1,round(nChanTotal/length(xKern)));

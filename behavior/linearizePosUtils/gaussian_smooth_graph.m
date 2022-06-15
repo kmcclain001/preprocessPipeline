@@ -1,7 +1,7 @@
 function v_smooth = gaussian_smooth_graph(G,v,s)
 
     %rows of v get smoothed, each row is like a trial or something
-    
+    % s = width of smoothing kernel
     v_smooth = zeros(size(v));
     
     %only compute for rows that are not all zero

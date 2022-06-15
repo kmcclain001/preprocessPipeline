@@ -4,7 +4,7 @@ addParameter(p,'padMeanRatio',1/10,@isnumeric);
 parse(p,varargin{:});
 padMeanRatio = p.Results.padMeanRatio;
 
-padWin = round(length(x)*padMeanRatio);
+padWin = ceil(length(x)*padMeanRatio);
 x = reshape(x,[length(x),1]);
 startVal = nanmean(x(1:padWin));
 endVal = nanmean(x((end-padWin):end));

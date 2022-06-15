@@ -1,0 +1,65 @@
+function linearize_position(varargin)
+
+p = inputParser;
+addParameter(p,'basepath',pwd,@isfolder);
+addParameter(p,'plotSummary',true,@islogical);
+
+parse(p,varargin{:});
+basepath = p.Results.basepath;
+plotSummary = p.Results.plotSummary;
+
+behavefile = checkFile('basepath',basepath,'fileType','.behavior.mat');
+
+% Linearize track
+[f,G,fig] = linearize_track([behavefile.folder filesep behavefile.name], true);
+
+% Load original behavior file
+load([behavefile.folder filesep behavefile.name])
+n_trials = size(behavior.events.trials,2);
+behavior.trackGraph = G;
+behavior.trackDistanceMatrix = distances(G);
+
+%Compute linearization for trial
+trial_pos_subsamps = zeros(n_trials,10,2);
+for i=1:n_trials
+    
+    %Compute linearization for trial
+    x = behavior.events.trials{i}.x;
+    y = behavior.events.trials{i}.y;
+    behavior.events.trials{i}.l = f([x,y]);
+    
+    sub_inds = round(linspace(1,length(behavior.events.trials{i}.x),10));
+    trial_pos_subsamps(i,:,1) = behavior.events.trials{i}.x(sub_inds);
+    trial_pos_subsamps(i,:,2) = behavior.events.trials{i}.y(sub_inds);
+end
+
+for j = 1:max(behavior.events.trialType)
+    trial_inds = find(behavior.events.trialType==j);
+    mean_sub_traj = mean(trial_pos_subsamps(trial_inds,:,:),1);
+    lin_sub_traj = f(reshape(mean_sub_traj,10,2));
+    P = [];
+    for k = 1:length(lin_sub_traj)-1
+        P = [P shortestpath(behavior.trackGraph,lin_sub_traj(k),lin_sub_traj(k+1))];
+    end
+    P = unique(P,'stable');
+    behavior.events.mapLinear{j} = P;
+end
+
+behavior.linearFunction = f;
+
+#save([behavefile.folder filesep behavefile.name],'behavior');
+
+if plotSummary
+    subplot(1,4,4);
+    trialN = round(n_trials/4);
+    x = behavior.events.trials{trialN}.x;
+    y = behavior.events.trials{trialN}.y;
+    l = f([x,y]);
+    plot(x,l);
+    title('x vs linear, example trial')
+    
+    savefig(gcf,[basepath '\sanityCheckFigures\linearize.fig'])
+    saveas(gcf,[basepath '\sanityCheckFigures\linearize.jpg'])
+end
+    
+end

@@ -1,4 +1,4 @@
-function createChannelMap_DVA(basepath)
+function probeNumber = createChannelMap_DVA(basepath)
 
 chInfo = hackInfo('basepath',basepath);
 
@@ -8,12 +8,14 @@ connected(chInfo.one.badChannels) = 0;
 xcoords = zeros(1,chInfo.nChannel);
 ycoords = zeros(1,chInfo.nChannel);
 kcoords = zeros(1,chInfo.nChannel);
+probeNumber = zeros(1,chInfo.nChannel);
 
 xCenter = 150;
 for shIdx = 1:8
     channels = chInfo.one.AnatGrps{shIdx};
     kcoords(channels) = shIdx;
     xcoords(channels) = xCenter;
+    probeNumber(channels) = 1;
     
     y = -50;
     for chIdx = 1:length(channels)
@@ -30,6 +32,7 @@ for shIdx = 9:12
     channels = chInfo.one.AnatGrps{shIdx};
     kcoords(channels) = shIdx;
     xcoords(channels) = xCenter;
+    probeNumber(channels) = 2;
     
     y = -25;
     for chIdx = 1:length(channels)

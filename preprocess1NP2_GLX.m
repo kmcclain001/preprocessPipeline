@@ -1,16 +1,32 @@
-basepath = pwd;
+function  preprocess1NP2_GLX(varargin)
+
+p = inputParser;
+addParameter(p,'basepath',pwd,@isfolder); % by default, current folder
+addParameter(p,'removeNoise',true,@islogical);
+
+parse(p,varargin{:});
+basepath = p.Results.basepath;
+removeNoise = p.Results.removeNoise;
+
+if ~exist('basepath','var')
+    error('path provided does not exist')
+end
+cd(basepath);
 
 %% Pull meta data
 
-% Get session names
+% Name session after session folder
 if strcmp(basepath(end),filesep)
     basepath = basepath(1:end-1);
 end
 [~,basename] = fileparts(basepath);
 
-% for now manually put desired xml in basepath - should probably automate
-xmlFile = checkFile('fileType','.xml','searchSubdirs',false);
+% Move first xml found to basepath
+xmlFile = checkFile('fileType','.xml','searchSubdirs',true);
 xmlFile = xmlFile(1);
+if ~(strcmp(xmlFile.folder,basepath)&&strcmp(xmlFile.name(1:end-4),basename))
+    copyfile([xmlFile.folder,filesep,xmlFile.name],[basepath,filesep,basename,'.xml'])
+end
 
 %% Make SessionInfo
 % assumes manual selection of bad channels
@@ -18,36 +34,31 @@ xmlFile = xmlFile(1);
 session = sessionTemplate(pwd,'showGUI',true); %
 save([basename '.session.mat'],'session');
 
-%% Find data paths
-
-fileInfo = dataPathsNP(basepath);
+mkdir([basepath '\sanityCheckFigures'])
 
 %% Concatenate dats
 
-cd(basepath);
-
 disp('Concatenate session folders...');
-bz_ConcatenateDats_NP(fileInfo)
-
-%% Remove bad channels from concatenated dat files
-
-removeChannels(basepath)
+bz_ConcatenateDats_NP2_GLX('basepath',basepath)
 
 %% Make LFP file
-
-bz_LFPfromDat_km(basepath,'datFile',[basename '_1.dat'],'inFs',2500,'outFS',1250); %downsample here
-
+  
+bz_LFPfromDat_km(basepath,'outFs',1250,'lopass',625); %downsample here
 
 %% Get tracking
 
-getSessionTracking_km('basepath',basepath,'method','neuropixel');
+getSessionTracking_km('basepath',basepath,'method','glx');
 
 %% Kilosort
 
-createChannelMapFile_NP(basepath);
+probeNumber = createChannelMap_NP2_GLX(basepath);
 
-savepath = KiloSortWrapper('SSD_path','H:');
+if removeNoise
+    datFileMeanSubtraction('basepath',basepath,'probeNumber',probeNumber,'method','subtractMedian');
+    fclose('all');
+end
 
-PhyAutoClustering_km(savepath);
+
+savepath = KSW_wrapper('basepath',basepath,'config','km','splitSorting',true);
 
 %% NOW SPIKE SORT %%

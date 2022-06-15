@@ -6,7 +6,9 @@ addParameter(p,'speedSmoothing',5/6,@isfloat);
 addParameter(p,'endZonePercentile',5,@isfloat);
 addParameter(p,'midZonePercentile',30,@isfloat);
 addParameter(p,'outlierPercentile',1,@isfloat);
-addParameter(p,'speedThresh',0.10,@isfloat);
+addParameter(p,'speedThresh',0.25,@isfloat);
+addParameter(p,'acelThresh',.02,@isfloat);
+addParameter(p,'durationThresh',5,@isfloat);
 addParameter(p,'plotSummary',true,@islogical);
 
 parse(p,varargin{:});
@@ -16,6 +18,8 @@ endZonePercentile = p.Results.endZonePercentile;
 midZonePercentile = p.Results.midZonePercentile;
 outlierPercentile = p.Results.outlierPercentile;
 speedThresh = p.Results.speedThresh;
+durationThresh = p.Results.durationThresh;
+acelThresh = p.Results.acelThresh;
 plotSummary = p.Results.plotSummary;
 
 f = checkFile('basepath',basepath,'fileType','.behavior.mat');
@@ -63,8 +67,8 @@ endZone2 = x>end_zone_marks(2);
 midZone1 = x<mid_zone_marks(1);
 midZone2 = x>mid_zone_marks(2);
 
-stop1 = midZone1 &(speed<speedThresh|endZone1|abs(accel_smoo)<0.01);
-stop2 = midZone2 &(speed<speedThresh|endZone2|abs(accel_smoo)<0.01);
+stop1 = midZone1 &(speed<speedThresh|endZone1|abs(accel_smoo)<acelThresh);
+stop2 = midZone2 &(speed<speedThresh|endZone2|abs(accel_smoo)<acelThresh);
 
 stop_int1 = findIntervals(stop1);
 int1 = stop_int1(:);
@@ -89,7 +93,7 @@ trialInts(:,2) = allInt(sortInds(trialIDInds+1));
 
 % exclude trials that are too long
 trialDur = diff(trialInts,[],2);
-longTrials = find(abs(trialDur-median(trialDur))>5*mad(trialDur));
+longTrials = find(abs(trialDur-median(trialDur))>durationThresh*mad(trialDur));
 trialInts(longTrials,:) = [];
 trialIDInds(longTrials) = [];
 trialDur(longTrials) = [];

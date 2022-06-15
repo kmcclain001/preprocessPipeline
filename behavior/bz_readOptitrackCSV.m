@@ -25,7 +25,7 @@ function [tracking] = bz_readOptitrackCSV(filenames,varargin)
 
 %% Parse Inputs
 
-ismethod = @(x) sum(strcmp(x,{'intan','neuropixel'}))==1;
+ismethod = @(x) sum(strcmp(x,{'intan','neuropixel','glx'}))==1;
 
 p = inputParser;
 
@@ -70,12 +70,20 @@ pos = pos(fileOrder);
 
 % get frame timing in digital input timestamps
 switch method
-    case 'intan'
+    case {'intan', 'glx'}
         % read optitrack sync channel
         fid = fopen([basepath, filesep, syncDatFile]);
         dig = fread(fid,[syncNbCh inf],'int16=>int16');  % default type for Intan digitalin
         dig = dig(syncChan,:);
-        dig = mod(dig,16); % because sometimes theres alternating 0,16 values?
+        
+        if strcmp(method,'glx')
+            dig = dig>0;
+        else
+            %dig = mod(dig,16); % because sometimes theres alternating 0,16 values?
+            dig = mod(dig,4); % changed 4.18.22 to mod 4 because there were some random spikes of +4
+            
+        end
+        
         t = (0:length(dig)-1)'/syncSampFq; % time vector in sec
         
         dPos = find(diff(dig)==1);
@@ -91,7 +99,6 @@ switch method
         end
         % Frame timing is the middle of shuter opening
         TTLtimes = (t(dPos)+t(dNeg))/2;
-        
         
     case 'neuropixel'
         % read timestamps

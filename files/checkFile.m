@@ -36,7 +36,8 @@ if isempty(filename)
     file = dir([basepath,filesep,'*',fileType]);
     if searchSubdirs
         subFile = dir([basepath,filesep,'*',filesep,'*',fileType]);
-        file = [file; subFile];
+        subsubFile = dir([basepath,filesep,'*',filesep,'*',filesep,'*',fileType]);
+        file = [file; subFile; subsubFile];
     end
     if isempty(file)
         error(['Cant find file of type: ',fileType,' in this location: ',basepath])
@@ -48,7 +49,8 @@ else
     file = dir([basepath,filesep,filename]);
     if searchSubdirs
         subFile = dir([basepath,filesep,'*',filesep,filename]);
-        file = [file; subFile];
+        subsubFile = dir([basepath,filesep,'*',filesep,'*',filesep,filename]);
+        file = [file; subFile; subsubFile];
     end
     if isempty(file)
         error(['Cant find file: ',filename,' in this location: ',basepath])

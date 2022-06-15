@@ -33,18 +33,19 @@ function [f, G, fig] = linearize_track(filename,plot_info)
 
     xOut = abs(x_all-mean(x_all))>(2*std(x_all));
     yOut = abs(y_all-mean(y_all))>(2*std(y_all));
+    %spOut = sp_all<0.5;
+
+    %K%
     outlierInds = xOut|yOut;
     x_trim = x_all(~outlierInds);
     y_trim = y_all(~outlierInds);
 
-%     %K% FOR TESTING PURPOSES
-%     t = (0:.001:1)';
-%     tt = (-1:.005:1)';
-%     x_trim = [sin(100*t);tt;zeros(size(tt))];repmat(t,50,1);%
-%     y_trim = [cos(100*t);zeros(size(tt));tt];%repmat(t,50,1);%
-%     x_trim = x_trim+.2*(rand(size(x_trim))-.5);
-%     y_trim = 1*(y_trim+.2*(rand(size(y_trim))-.5));
-%     %K%
+    %K%
+    t = (0:.01:100)';
+    x_trim = sin(t)+.2*(rand(size(t))-.5);
+    y_trim = cos(t)+.2*(rand(size(t))-.5);
+    x_trim = [x_trim;-1:.1:1]
+    %K%
 
 
     % Transform to Standard Map
@@ -52,7 +53,7 @@ function [f, G, fig] = linearize_track(filename,plot_info)
     east = 1.25;
     north = 1.25;
     south = -1.25;
-    grain = 300;
+    grain = 200;
     %using x scale to prevent distortion since we know its a line
     scale = @(p) scale_2D(p,east,west,north,south,grain-1,grain-1);
 
@@ -69,8 +70,12 @@ function [f, G, fig] = linearize_track(filename,plot_info)
     end
 
     % Rectify
-    thresh = prctile(occ(occ>0),[25,99]);
+    %thresh = .3*mean((occ(occ>0)));
+    %c = occ.^2;
+    thresh = prctile(occ(occ>0),[25,30]);
     occ_rect = occ;
+% % %     occ_rect(~inRange(occ,thresh,true)) = 0;
+    %K%
     occ_rect(occ_rect<thresh(1)) = 0;
     occ_rect(occ_rect>thresh(2)) = thresh(2);
     
@@ -83,15 +88,14 @@ function [f, G, fig] = linearize_track(filename,plot_info)
     occ_bord((border+1):(grain+border),(border+1):(grain+border)) = occ_sc;
     
     % Smooth Heat Map
-    % 5/30/22 smooth with downsampled image to preserve statistics
     occ_smooth = imgaussfilt(occ_bord,floor(border/2));
-    occ_down_smooth = occ_smooth(1:floor(border/8):size(occ_smooth,1),1:floor(border/8):size(occ_smooth,2));
-    occ_flat = conv2(occ_bord,occ_down_smooth,'same');
+    occ_down_smooth = occ_smooth(1:floor(border/4):size(occ_smooth,1),1:floor(border/4):size(occ_smooth,2));
+    occ_flat = conv2(occ_bord,occ_down_smooth.^.25,'same');
     %occ_flat = occ_smooth;%.^.25;
 
     % Threshold
     %thresh = .25*max(max(occ_smooth));
-    thresh=0.5*mean(occ_flat(occ_flat>0)); %arbitrary scale
+    thresh=mean(occ_flat(occ_flat>0));
     occ_flat(occ_flat<=thresh) = 0;
     occ_flat(occ_flat>thresh) = 1;
 

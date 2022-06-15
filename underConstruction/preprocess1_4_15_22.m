@@ -68,78 +68,75 @@ if strcmp(basepath(end),filesep)
 end
 [~,basename] = fileparts(basepath);
 
-% Get xml file in order
-xmlFile = checkFile('fileType','.xml','searchSubdirs',true);
-xmlFile = xmlFile(1);
-if ~(strcmp(xmlFile.folder,basepath)&&strcmp(xmlFile.name(1:end-4),basename))
-    copyfile([xmlFile.folder,filesep,xmlFile.name],[basepath,filesep,basename,'.xml'])
-end
-
-%% Make SessionInfo
-% ID bad channels at this point. automating would be good
-
+% % % % Get xml file in order
+% % % xmlFile = checkFile('fileType','.xml','searchSubdirs',true);
+% % % xmlFile = xmlFile(1);
+% % % if ~(strcmp(xmlFile.folder,basepath)&&strcmp(xmlFile.name(1:end-4),basename))
+% % %     copyfile([xmlFile.folder,filesep,xmlFile.name],[basepath,filesep,basename,'.xml'])
+% % % end
+% % % 
+% % % %% Make SessionInfo
+% % % % ID bad channels at this point. automating would be good
+% % % 
 % % % session = sessionTemplate(basepath,'showGUI',true); %
 % % % save([basename '.session.mat'],'session');
 % % % 
+% % % mkdir([basepath '\sanityCheckFigures'])
 
-mkdir([basepath '\sanityCheckFigures'])
-
-
-%% Fill missing dat files of zeros
-if fillMissingDatFiles
-    if isempty(fillTypes)
-        fillTypes = {'analogin';'digitalin';'auxiliary';'time';'supply'};
-    end
-    for ii = 1:length(fillTypes)
-        fillMissingDats('basepath',basepath,'fileType',fillTypes{ii});
-    end
-end
-
-%% Concatenate sessions
-
-cd(basepath);
-
-disp('Concatenate session folders...');
-bz_ConcatenateDats_km('basepath',basepath);
-
-%% Process additional inputs
-
-% Auxilary input
-if getAcceleration
-    accel = bz_computeIntanAccel('saveMat',true); % uses the old sessionInfo
-end
-
-%% Make LFP
-
-bz_LFPfromDat_km(basepath,'outFs',1250,'lopass',625); % generating lfp
+% % % %% Fill missing dat files of zeros
+% % % if fillMissingDatFiles
+% % %     if isempty(fillTypes)
+% % %         fillTypes = {'analogin';'digitalin';'auxiliary';'time';'supply'};
+% % %     end
+% % %     for ii = 1:length(fillTypes)
+% % %         fillMissingDats('basepath',basepath,'fileType',fillTypes{ii});
+% % %     end
+% % % end
+% % % 
+% % % %% Concatenate sessions
+% % % 
+% % % cd(basepath);
+% % % 
+% % % disp('Concatenate session folders...');
+% % % bz_ConcatenateDats_km('basepath',basepath);
+% % % 
+% % % %% Process additional inputs
+% % % 
+% % % % Auxilary input
+% % % if getAcceleration
+% % %     accel = bz_computeIntanAccel('saveMat',true); % uses the old sessionInfo
+% % % end
+% % % 
+% % % %% Get tracking positions 
+% % % 
+% % % if getPos
+% % %     getSessionTracking_km('basepath',basepath);
+% % % end
+% % % 
+% % % %% Make LFP
+% % % 
+% % % bz_LFPfromDat_km(basepath,'outFs',1250,'lopass',625); % generating lfp
 
 %% remove noise from data for cleaner spike sorting
 
 % NEED TO EDIT CHANNEL MAP FUNCTIONS
-%probeNumber = 
-createChannelMap_phoebe(basepath);
+probeNumber = createChannelMap_DVB(basepath);
 
 if removeNoise
     datFileMeanSubtraction('basepath',basepath,'probeNumber',probeNumber,'method','subtractMedian');
     fclose('all');
 end
 
-% Kilosort concatenated sessions
+%% Kilosort concatenated sessions
 
-%savepath = KiloSortWrapper('basepath',basepath,'config','km');
-savepath = KSW_wrapper('basepath',basepath,'config','km','splitSorting',true);
+savepath = KiloSortWrapper('basepath',basepath);
+
 PhyAutoClustering_km(savepath);
 
 %% Get brain states 
 %not working for me, i think there are some issues selecting best channels
 if stateScore
     SleepScoreMaster_km(pwd,'noPrompts',true);
-end
-
-%% Get tracking positions 
-
-if getPos
-    getSessionTracking_km('basepath',basepath);
 end
 
 %% NOW SPIKE SORT %%

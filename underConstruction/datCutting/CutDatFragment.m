@@ -33,9 +33,18 @@ end
 
 
 %% Gather recording meta info
-[amplifier_channels, notes, aux_input_channels, spike_triggers,...         
-board_dig_in_channels, board_adc_channels, supply_voltage_channels, frequency_parameters ] = read_Intan_RHD2000_file(pwd,'info.rhd');
+% [amplifier_channels, notes, aux_input_channels, spike_triggers,...         
+% board_dig_in_channels, supply_voltage_channels, frequency_parameters ] = read_Intan_RHD2000_file(pwd,'info.rhd');
 
+info_file = checkFile('fileType','.rhd');
+
+meta_data = read_Intan_Info_Wrapper([info_file.folder,filesep,info_file.name]);
+
+amplifier_channels = meta_data.amplifier_channels;
+aux_input_channels = meta_data.aux_input_channels;
+board_dig_in_channels = meta_data.board_dig_in_channels;
+supply_voltage_channels = meta_data.supply_voltage_channels;
+frequency_parameters = meta_data.frequency_parameters;
 
 % amplifier_channels = 1:1:64;
 % aux_input_channels = 3;
@@ -43,7 +52,7 @@ board_dig_in_channels, board_adc_channels, supply_voltage_channels, frequency_pa
 % frequency_parameters.amplifier_sample_rate = 30000;
 
 %% amplifier.dat
-disp('Writing amplifier file')
+ disp('Writing amplifier file')
 NumCh = length(amplifier_channels);
 SampRate = frequency_parameters.amplifier_sample_rate;
 if RenameOriginalsAsOrig
@@ -74,6 +83,7 @@ else
     outname = 'auxiliary_fragment.dat';
 end
 NumCh = length(aux_input_channels);
+SampRate = frequency_parameters.aux_input_sample_rate;
 m = memmapfile(inname,'Format','uint16');
 h1 = fopen(outname,'W');
 for i = timeperiod(1)+1:timeperiod(2)
@@ -94,6 +104,7 @@ if ~isempty(d)
         outname = 'analogin_fragment.dat';
     end
     NumCh = length(board_adc_channels);
+    SampRate = frequency_parameters.board_adc_sample_rate;
     m = memmapfile(inname,'Format','uint16');
     h2 = fopen(outname,'W');
     for i = timeperiod(1)+1:timeperiod(2)
@@ -116,6 +127,7 @@ if ~isempty(d)
     end
     disp('Writing digitalin file')
     NumCh = length(board_dig_in_channels);
+    SampRate = frequency_parameters.board_dig_in_sample_rate;
     m = memmapfile(inname,'Format','uint16');
     h3 = fopen(outname,'W');
     for i = timeperiod(1)+1:timeperiod(2)
@@ -151,9 +163,13 @@ else
     outname = 'supply.dat_fragment.dat';
 end
 disp('Writing supply file')
-NumCh = length(length(supply_voltage_channels));
+NumCh = length(supply_voltage_channels);
+SampRate = frequency_parameters.supply_voltage_sample_rate;
 m = memmapfile(inname,'Format','uint16','writable',false);
 h5 = fopen(outname,'W');
-fwrite(h5,m.Data(timeperiod(1)*NumCh*SampRate+1:timeperiod(end)*SampRate),'uint16');
+
+for i = timeperiod(1)+1:timeperiod(2)
+    fwrite(h5,m.Data((i-1)*NumCh*SampRate+1:i*NumCh*SampRate),'uint16');
+end
 fclose(h5);
 

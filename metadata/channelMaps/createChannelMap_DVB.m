@@ -1,4 +1,4 @@
-function createChannelMap_DVB(basepath)
+function probeNumber = createChannelMap_DVB(basepath)
 
 chInfo = hackInfo('basepath',basepath);
 
@@ -8,11 +8,13 @@ connected(chInfo.one.badChannels) = 0;
 xcoords = zeros(1,chInfo.nChannel);
 ycoords = zeros(1,chInfo.nChannel);
 kcoords = zeros(1,chInfo.nChannel);
+probeNumber = zeros(1,chInfo.nChannel);
 
 xCenter = 150;
 for shIdx = 1:4
     channels = chInfo.one.AnatGrps{shIdx};
     kcoords(channels) = shIdx;
+    probeNumber(channels) = 1;
     
     %high channel
     xcoords(channels(1)) = xCenter;
@@ -49,6 +51,7 @@ xDifFromPrev = [37 -33 29 -25 21 -17 8.5];
 for shIdx = 5:12
     channels = chInfo.one.AnatGrps{shIdx};
     kcoords(channels) = shIdx;
+    probeNumber(channels) = 2;
     
     y = -20;
     x = xCenter;

@@ -34,7 +34,7 @@ for i=1:max(Tuning.trialType)
         FR = Tuning.fr(trial_type_inds,position_type_inds,:);
         
         % for each cell
-         for j=1:Tuning.nCells
+         for j= 1:Tuning.nCells
             
             if true%strcmp(Tuning.region{j},'CA1') %&& CellClass.Pyr(j)==1
                 

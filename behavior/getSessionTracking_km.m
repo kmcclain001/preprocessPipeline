@@ -47,7 +47,7 @@ function [behavior] = getSessionTracking_km(varargin)
 
 %% Defaults and Params
 
-ismethod = @(x) sum(strcmp(x,{'intan','neuropixel'}));
+ismethod = @(x) sum(strcmp(x,{'intan','neuropixel','glx'}));
 
 p = inputParser;
 addParameter(p,'basepath',pwd,@isstr);
@@ -61,7 +61,7 @@ saveMat = p.Results.saveMat;
 forceReload = p.Results.forceReload;
 method = p.Results.method;
 
-%% In case tracking already exists 
+%% In case tracking already exists %%EDIT
 if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
     disp('Trajectory already detected! Loading file.');
     file = dir([basepath filesep '*Tracking.Behavior.mat']);
@@ -88,6 +88,7 @@ clear trackData;
 separateFolders = unique({trackingFiles.folder},'stable');
 nFolders = length(separateFolders);
 t0 = zeros(nFolders,1);
+
 
 for fIdx = 1:nFolders
     tmpFolder = separateFolders{fIdx};

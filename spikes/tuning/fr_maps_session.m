@@ -29,13 +29,13 @@ behavior.usableTypes = usable_types;
 Tuning.usableTypes = usable_types;
 
 % smooth occupancy
-Tuning.occupancySmooth = gaussian_smooth_graph(behavior.trackGraph,Tuning.occupancy,4);
+Tuning.occupancySmooth = gaussian_smooth_graph(behavior.trackGraph,Tuning.occupancy,10);
 
 % smooth spike counts
 smoothed_spikes = zeros(size(Tuning.spikeCount));
 for j = 1:Tuning.nCells
     %K%if strcmp(Tuning.region{j},'hpc')
-        smoothed_spikes(:,:,j) = gaussian_smooth_graph(behavior.trackGraph,Tuning.spikeCount(:,:,j),4);
+        smoothed_spikes(:,:,j) = gaussian_smooth_graph(behavior.trackGraph,Tuning.spikeCount(:,:,j),10);
     %K%end
 end
 Tuning.spikeCountSmoothed = smoothed_spikes;
