@@ -1,5 +1,5 @@
 # preprocessPipeline
-code to preprocess ephys data stored in date files to extract spike times, LFP information, spike sort etc.
+code to preprocess ephys data stored in dat files to extract spike times, LFP information, spike sort etc.
 
 'preprocess1' (or 'preprocess1NP' for neuropixel) and 'preprocess2' have code laid out to go from raw dats to place fields.
 'preprocess1' is everything leading up to manual spike sorting and 'preprocess2' is everything after
@@ -17,6 +17,3 @@ all of the code called is organized in the follow subdirectories:
 - spikes: spike sorting, accessing spikes, classifying cell types, computing tuning, etc.
 
 Let me know how it works, feel free to make additions
-
-Love you,
-Kathryn
